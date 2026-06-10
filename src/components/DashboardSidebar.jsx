@@ -28,7 +28,7 @@ const DashboardSideBar = () => {
     { key: "events", label: "Approve Events", icon: FaCalendarAlt, href: "/dashboard/events" },
     { key: "transactions", label: "Transaction Logs", icon: FaHistory, href: "/dashboard/transactions" },
   ]
-  const role = session?.user?.role;
+  const role = session?.user?.role
 
   const menuItems = role === "organizer" ? organizerMenu : role === "attendee" ? attendeeMenu :
   role === "admin" ? adminMenu : null;
