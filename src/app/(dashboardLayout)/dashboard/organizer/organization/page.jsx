@@ -1,18 +1,28 @@
 'use client'
 import DashboardHeading from '@/components/DashboardHeading';
-import { addOrganization } from '@/lib/api/organizations/action';
+import { addOrganization, updateOrg } from '@/lib/api/organizations/action';
+import { myOrganization } from '@/lib/api/organizations/data';
 import { useSession } from '@/lib/auth-client';
 import { uploadImage } from '@/utils/uploadImage';
 import { Button, Card, CardHeader, Form, Input, TextArea } from '@heroui/react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { FaImage } from 'react-icons/fa';
 
 const OrganizationPage = () => {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
+  const [myOrg, setMyOrg] = useState(null);
   const { register, handleSubmit, formState: { errors } } = useForm()
 
+  useEffect(() => {
+    const setOrgData = async () => {
+      const org = await myOrganization(session.user.email)
+      setMyOrg(org)
+    }
+    setOrgData()
+  }, [session])
+  // console.log("myorg", myOrg);
 
   const onSubmit = async (data) => {
 
@@ -26,11 +36,20 @@ const OrganizationPage = () => {
       description: data.description,
       organizerEmail: session?.user?.email,
     }
-    // console.log(orgData);
-    const resData = await addOrganization(orgData);
-    if (resData.insertedId) {
-      toast.success("Org Profile added")
+
+    if (!myOrg) {
+      const resData = await addOrganization(orgData);
+      if (resData.insertedId) {
+        toast.success("Org Profile added")
+      }
     }
+    else {
+      const updatedRes = await updateOrg(orgData, myOrg._id)
+      if (updatedRes.modifiedCount > 0) {
+        toast.success("Org Profile updated")
+      }
+    }
+
 
   }
   return (
@@ -47,6 +66,7 @@ const OrganizationPage = () => {
               onSubmit={handleSubmit(onSubmit)}
               className="space-y-4 w-full">
               <Input
+                defaultValue={myOrg?.organizationName}
                 {...register("organizationName", { required: "Organization Name is Required" })}
                 id="organizationName" label="Organization Name" labelPlacement="outside" placeholder="TechEvents Corp" required className="w-full bg-slate-900/50 border-white/10 hover:border-pink-500/50 focus-within:!border-pink-500" />
 
@@ -70,6 +90,7 @@ const OrganizationPage = () => {
                 errors.logo && <p className="text-red-500">{errors.logo.message}</p>
               }
               <Input
+                defaultValue={myOrg?.website}
                 {...register("website", { required: "Organization Website is Required" })}
                 id="website" label="Organization Website" labelPlacement="outside" placeholder="techevents.corp" required className="w-full bg-slate-900/50 border-white/10 hover:border-pink-500/50 focus-within:!border-pink-500" />
 
@@ -78,6 +99,7 @@ const OrganizationPage = () => {
               }
 
               <TextArea
+                defaultValue={myOrg?.description}
                 {...register("description", { required: "Description is Required" })}
                 id="description" label="Description" labelPlacement="outside" placeholder="Hosting global developer conferences and software hacking marathons." required className="w-full bg-slate-900/50 border border-white/10 rounded-xl focus:outline-none min-h-[100px] text-white text-sm" />
 
