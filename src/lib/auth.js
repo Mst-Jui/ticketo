@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
 
-const client = new MongoClient(process.env.MONGODB_URI );
+const client = new MongoClient(process.env.MONGODB_URI);
 const db = client.db(process.env.DB_NAME);
 
 export const auth = betterAuth({
@@ -19,14 +19,17 @@ export const auth = betterAuth({
     }
   },
   user: {
-       additionalFields: {
-          role: {
-              defaultValue: "attendee"
-            },
-            isBlocked: {
-              defaultValue: false
-            }
-        }
+    additionalFields: {
+      role: {
+        defaultValue: "attendee"
+      },
+      isBlocked: {
+        defaultValue: false
+      },
+      isPremium: {
+        defaultValue: false,
+      },
     }
- 
+  }
+
 });
